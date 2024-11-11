@@ -1,38 +1,29 @@
 # The example function below keeps track of the opponent's history and plays whatever the opponent played two plays ago. It is not a very good player so you will need to change the code to pass the challenge.
 
-def player(prev_play, opponent_history=[]):
-  global victory
+def player(prev_play, opp_history=[], play_order={}):
+  if not prev_play:
+      prev_play = 'R'
 
-  n = 3
+  opp_history.append(prev_play)
+  predict = 'P'
 
-  if prev_play in ["R","P","S"]:
-    opponent_history.append(prev_play)
+  if len(opp_history) > 4:
+      last_five = "".join(opp_history[-5:])
+      play_order[last_five] = play_order.get(last_five, 0) + 1
 
-  guess = "R"
+      potential = [
+          "".join([*opp_history[-4:], v]) 
+          for v in ['R', 'P', 'S']
+      ]
 
-  if len(opponent_history)>n:
-    in_put = "".join(opponent_history[-n:])
+      sub_order = {
+          k: play_order[k]
+          for k in potential if k in play_order
+      }
 
-    if "".join(opponent_history[-(n+1):]) in victory.keys():
-      victory["".join(opponent_history[-(n+1):])]+=1
-    else:
-      victory["".join(opponent_history[-(n+1):])]=1
+      if sub_order:
+          predict = max(sub_order, key=sub_order.get)[-1:]
 
-    possibility =[in_put+"R", in_put+"P", in_put+"S"]
+  response = {'P': 'S', 'R': 'P', 'S': 'R'}
 
-    for i in possibility:
-      if not i in victory.keys():
-        victory[i] = 0
-
-    predict = max(possibility, key=lambda key: victory[key])
-
-    if predict[-1] == "P":
-      guess = "S"
-    if predict[-1] == "R":
-      guess = "P"
-    if predict[-1] == "S":
-      guess = "R"
-
-
-  return guess
-  
+  return response[predict]
